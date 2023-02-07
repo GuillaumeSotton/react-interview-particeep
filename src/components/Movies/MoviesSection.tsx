@@ -1,9 +1,10 @@
 //React libraries
-import {useEffect} from "react";
+import {useEffect, useMemo} from "react";
 import {useDispatch, useSelector} from "react-redux";
 
 //Components
-import MovieCard from "./Card/MovieCard";
+import MovieFilters from "./Filters/MovieFilters";
+import MoviesList from "../MoviesList";
 
 //Data
 import {movies$} from "../../data/movies";
@@ -19,23 +20,35 @@ const MoviesSection = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     //Use selector
-    const {movies} = useSelector(selectMovies);
+    const {categories, currentPage, itemsPerPage, movies} = useSelector(selectMovies);
 
     useEffect(() => {
         movies$.then((resolvedMovies) => dispatch(setMovies(resolvedMovies)));
     }, [dispatch]);
 
+    const filteredMovies = useMemo(() => {
+        return movies.filter(movie => {
+            // If length is equals to zero, consider every category
+            if(categories.length === 0){
+                return true;
+            }
+
+            return categories.includes(movie.category)
+        });
+    }, [categories, movies]);
+
+    const moviesToDisplay = filteredMovies.slice(
+        currentPage * itemsPerPage,
+        currentPage * itemsPerPage + itemsPerPage
+    );
+
     return(
-        <div>
+        <div className="p-8 space-y-6">
             <div>
-                <span>FILTERS</span>
+                <MovieFilters movies={filteredMovies}/>
             </div>
 
-            <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
-                    {movies.map((movie) => <MovieCard movie={movie}/>)}
-                </div>
-            </div>
+            <MoviesList movies={moviesToDisplay}/>
         </div>
     );
 }
