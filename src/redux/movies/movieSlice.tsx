@@ -26,7 +26,7 @@ export const movieSlice = createSlice({
         dislikeMovie: (state, action: PayloadAction<string>) => {
             state.movies = state.movies.map(movie => {
                 if (movie.id === action.payload) {
-                    movie.likes = movie.likes - 1
+                    movie.dislikes = movie.dislikes + 1
                 }
                 return movie
             })
